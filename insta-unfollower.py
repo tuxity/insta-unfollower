@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import time
 import random
 import requests
@@ -47,18 +48,12 @@ def login():
     login = session.post(login_route, data=post_data, allow_redirects=True)
     login_r = json.loads(login.text)
 
-    if login_r['authenticated'] == True:
-        print ('successfully logged in!')
-
+    if login_r['authenticated']:
         session.headers.update({
             'X-CSRFToken': login.cookies['csrftoken']
         })
-    else:
-        if login_r['user'] == True:
-            print ('login failed, wrong password')
-        else:
-            print ('login failed, verify user/password combination')
-        quit()
+
+    return login_r['authenticated']
 
 
 def logout():
@@ -67,19 +62,26 @@ def logout():
     }
 
     logout = session.post(logout_route, data=post_data)
+
     if logout.status_code == 200:
-        print ('successfully logged out')
+        return True
+    return False
 
 
 def main():
     if not os.environ.get('USERNAME') or not os.environ.get('PASSWORD'):
-        print ('Please provide USERNAME and PASSWORD environement variables.')
-        print ('Abording...')
-        quit()
+        sys.exit('please provide USERNAME and PASSWORD environement variables. Abording...')
 
-    login()
+    is_logged = login()
+    if is_logged == False:
+        sys.exit('login failed, verify user/password combination')
+
     #unfollow flow
-    logout()
+
+    is_logged_out = logout()
+    if is_logged_out:
+        print ('successfully logged out')
+        sys.exit(0)
 
 
 if __name__ == "__main__":
