@@ -134,7 +134,7 @@ def get_followers_list():
 def unfollow(user):
     print ('unfollowing %s' % user['username'])
 
-    response = session.post(unfollow_route % user['id'])
+    response = session.post(unfollow_route % (instagram_url, user['id']))
     response = json.loads(response.text)
 
     if response['status'] != 'ok':
