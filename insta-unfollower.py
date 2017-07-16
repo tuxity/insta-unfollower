@@ -35,9 +35,9 @@ def login():
         'ig_vw': '1920',
     })
 
-    r = session.get(instagram_url)
+    reponse = session.get(instagram_url)
     session.headers.update({
-        'X-CSRFToken': r.cookies['csrftoken']
+        'X-CSRFToken': reponse.cookies['csrftoken']
     })
 
     time.sleep(random.randint(2, 6))
@@ -47,15 +47,15 @@ def login():
         'password': os.environ.get('PASSWORD')
     }
 
-    login = session.post(login_route, data=post_data, allow_redirects=True)
-    login_r = json.loads(login.text)
+    reponse = session.post(login_route, data=post_data, allow_redirects=True)
+    reponse_data = json.loads(reponse.text)
 
-    if login_r['authenticated']:
+    if reponse_data['authenticated']:
         session.headers.update({
-            'X-CSRFToken': login.cookies['csrftoken']
+            'X-CSRFToken': reponse.cookies['csrftoken']
         })
 
-    return login_r['authenticated']
+    return reponse_data['authenticated']
 
 def get_follows_list():
     follows_list = []
@@ -132,13 +132,13 @@ def get_followers_list():
     return followers_list
 
 def unfollow(user):
-    print ('unfollowing %s' % user['username'])
+    print('unfollowing {}'.format(user['username']))
 
     response = session.post(unfollow_route % (instagram_url, user['id']))
     response = json.loads(response.text)
 
     if response['status'] != 'ok':
-        print ('ERROR: %s' % unfollow.text)
+        print('ERROR: {}'.format(unfollow.text))
         sys.exit('might be unfollowing too fast, quit to prevent ban...')
 
 def logout():
@@ -161,19 +161,24 @@ def main():
     if is_logged == False:
         sys.exit('login failed, verify user/password combination')
 
+    print('You\'re now logged as {}'.format(os.environ.get('USERNAME')))
+
     time.sleep(random.randint(2, 6))
 
-    follows_list = get_follows_list()
     followers_list = get_followers_list()
+    follows_list = get_follows_list()
+    print('{} followers'.format(len(followers_list)))
+    print('{} following'.format(len(follows_list)))
 
-    unfollow_user_list = [user for user in follows_list if user not in followers_list]
+    unfollow_users_list = [user for user in follows_list if user not in followers_list]
+    print('you are following {} user(s) which aren\'t following you. Start to clean it up...'.format(len(unfollow_users_list)))
 
-    for user in unfollow_user_list:
+    for user in unfollow_users_list:
         unfollow(user)
 
     is_logged_out = logout()
     if is_logged_out:
-        print ('successfully logged out')
+        print('successfully logged out')
         sys.exit(0)
 
 
