@@ -139,8 +139,6 @@ def get_followers_list():
     return followers_list
 
 def unfollow(user):
-    print('unfollowing {}'.format(user['username']))
-
     response = session.post(unfollow_route % (instagram_url, user['id']))
     response = json.loads(response.text)
 
@@ -187,6 +185,7 @@ def main():
         print('Begin to unfollow users...')
 
         for user in unfollow_users_list:
+            print('unfollowing {}'.format(user['username']))
             unfollow(user)
 
     is_logged_out = logout()
