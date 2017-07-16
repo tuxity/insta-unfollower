@@ -57,6 +57,13 @@ def login():
 
     return reponse_data['authenticated']
 
+# Not so useful, it's just to simulate human actions better
+def get_user_profile(username):
+    response = session.get('https://www.instagram.com/%s/?__a=1' % (username))
+    response = json.loads(response.text)
+
+    return response['user']
+
 def get_follows_list():
     follows_list = []
 
@@ -162,6 +169,8 @@ def main():
         sys.exit('login failed, verify user/password combination')
 
     print('You\'re now logged as {}'.format(os.environ.get('USERNAME')))
+
+    get_user_profile(os.environ.get('USERNAME'))
 
     time.sleep(random.randint(2, 6))
 
