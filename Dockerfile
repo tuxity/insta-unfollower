@@ -5,4 +5,6 @@ WORKDIR /usr/src/insta-unfollower
 
 COPY insta-unfollower.py /usr/src/insta-unfollower/
 
+RUN pip install --no-cache-dir -r requirements.txt
+
 ENTRYPOINT ["python", "-u", "insta-unfollower.py"]
