@@ -131,6 +131,16 @@ def get_followers_list():
 
     return followers_list
 
+def unfollow(user):
+    print ('unfollowing %s' % user['username'])
+
+    response = session.post(unfollow_route % user['id'])
+    response = json.loads(response.text)
+
+    if response['status'] != 'ok':
+        print ('ERROR: %s' % unfollow.text)
+        sys.exit('might be unfollowing too fast, quit to prevent ban...')
+
 def logout():
     post_data = {
         'csrfmiddlewaretoken': session.cookies['csrftoken']
@@ -154,8 +164,12 @@ def main():
     time.sleep(random.randint(2, 6))
 
     follows_list = get_follows_list()
-
     followers_list = get_followers_list()
+
+    unfollow_user_list = [user for user in follows_list if user not in followers_list]
+
+    for user in unfollow_user_list:
+        unfollow(user)
 
     is_logged_out = logout()
     if is_logged_out:
