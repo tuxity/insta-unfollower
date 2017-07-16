@@ -171,14 +171,16 @@ def main():
     print('{} following'.format(len(follows_list)))
 
     unfollow_users_list = [user for user in follows_list if user not in followers_list]
-    print('you are following {} user(s) which aren\'t following you. Start to clean it up...'.format(len(unfollow_users_list)))
+    print('you are following {} user(s) which aren\'t following you.'.format(len(unfollow_users_list)))
 
-    for user in unfollow_users_list:
-        unfollow(user)
+    if len(unfollow_users_list) > 0:
+        print('Begin to unfollow users...')
+
+        for user in unfollow_users_list:
+            unfollow(user)
 
     is_logged_out = logout()
     if is_logged_out:
-        print('successfully logged out')
         sys.exit(0)
 
 
