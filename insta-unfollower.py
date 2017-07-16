@@ -166,12 +166,13 @@ def main():
     time.sleep(random.randint(2, 6))
 
     followers_list = get_followers_list()
+    print('found {} followers'.format(len(followers_list)))
+
     follows_list = get_follows_list()
-    print('{} followers'.format(len(followers_list)))
-    print('{} following'.format(len(follows_list)))
+    print('found {} following'.format(len(follows_list)))
 
     unfollow_users_list = [user for user in follows_list if user not in followers_list]
-    print('you are following {} user(s) which aren\'t following you.'.format(len(unfollow_users_list)))
+    print('you are following {} user(s) who aren\'t following you.'.format(len(unfollow_users_list)))
 
     if len(unfollow_users_list) > 0:
         print('Begin to unfollow users...')
