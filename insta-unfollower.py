@@ -11,6 +11,8 @@ import json
 instagram_url = 'https://www.instagram.com'
 login_route = '%s/accounts/login/ajax/' % (instagram_url)
 logout_route = '%s/accounts/logout/' % (instagram_url)
+query_route = '%s/graphql/query/' % (instagram_url)
+unfollow_route = '%s/web/friendships/%s/unfollow/'
 
 session = requests.Session()
 
@@ -38,7 +40,7 @@ def login():
         'X-CSRFToken': r.cookies['csrftoken']
     })
 
-    time.sleep(5 * random.random())
+    time.sleep(random.randint(2, 6))
 
     post_data = {
         'username': os.environ.get('USERNAME'),
@@ -55,6 +57,79 @@ def login():
 
     return login_r['authenticated']
 
+def get_follows_list():
+    follows_list = []
+
+    follows_post = {
+        'query_id': 17874545323001329,
+        'variables': {
+            'id': session.cookies['ds_user_id'],
+            'first': 20
+        }
+    }
+    follows_post['variables'] = json.dumps(follows_post['variables'])
+    response = session.post(query_route, data=follows_post)
+    response = json.loads(response.text)
+
+    for edge in response['data']['user']['edge_follow']['edges']:
+        follows_list.append(edge['node'])
+
+    while response['data']['user']['edge_follow']['page_info']['has_next_page']:
+        time.sleep(random.randint(1, 4))
+
+        follows_post = {
+            'query_id': 17874545323001329,
+            'variables': {
+                'id': session.cookies['ds_user_id'],
+                'first': 10,
+                'after': response['data']['user']['edge_follow']['page_info']['end_cursor']
+            }
+        }
+        follows_post['variables'] = json.dumps(follows_post['variables'])
+        response = session.post(query_route, data=follows_post)
+        response = json.loads(response.text)
+
+        for edge in response['data']['user']['edge_follow']['edges']:
+            follows_list.append(edge['node'])
+
+    return follows_list
+
+def get_followers_list():
+    followers_list = []
+
+    followers_post = {
+        'query_id': 17851374694183129,
+        'variables': {
+            'id': session.cookies['ds_user_id'],
+            'first': 20
+        }
+    }
+    followers_post['variables'] = json.dumps(followers_post['variables'])
+    response = session.post(query_route, data=followers_post)
+    response = json.loads(response.text)
+
+    for edge in response['data']['user']['edge_followed_by']['edges']:
+        followers_list.append(edge['node'])
+
+    while response['data']['user']['edge_followed_by']['page_info']['has_next_page']:
+        time.sleep(random.randint(1, 4))
+
+        followers_post = {
+            'query_id': 17851374694183129,
+            'variables': {
+                'id': session.cookies['ds_user_id'],
+                'first': 10,
+                'after': response['data']['user']['edge_followed_by']['page_info']['end_cursor']
+            }
+        }
+        followers_post['variables'] = json.dumps(followers_post['variables'])
+        response = session.post(query_route, data=followers_post)
+        response = json.loads(response.text)
+
+        for edge in response['data']['user']['edge_followed_by']['edges']:
+            followers_list.append(edge['node'])
+
+    return followers_list
 
 def logout():
     post_data = {
@@ -76,7 +151,11 @@ def main():
     if is_logged == False:
         sys.exit('login failed, verify user/password combination')
 
-    #unfollow flow
+    time.sleep(random.randint(2, 6))
+
+    follows_list = get_follows_list()
+
+    followers_list = get_followers_list()
 
     is_logged_out = logout()
     if is_logged_out:
