@@ -168,6 +168,8 @@ def main():
 
     print('You\'re now logged as {}'.format(os.environ.get('USERNAME')))
 
+    time.sleep(random.randint(1, 3))
+
     get_user_profile(os.environ.get('USERNAME'))
 
     time.sleep(random.randint(2, 6))
