@@ -188,6 +188,9 @@ def main():
         print('Begin to unfollow users...')
 
         for user in unfollow_users_list:
+            if not os.environ.get('UNFOLLOW_VERIFIED') and user['is_verified'] == True:
+                continue
+
             print('unfollowing {}'.format(user['username']))
             unfollow(user)
 
