@@ -191,6 +191,8 @@ def main():
             if not os.environ.get('UNFOLLOW_VERIFIED') and user['is_verified'] == True:
                 continue
 
+            time.sleep(random.randint(30, 120))
+
             print('unfollowing {}'.format(user['username']))
             unfollow(user)
 
