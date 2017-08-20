@@ -83,7 +83,7 @@ def get_follows_list():
         follows_list.append(edge['node'])
 
     while response['data']['user']['edge_follow']['page_info']['has_next_page']:
-        time.sleep(random.randint(1, 4))
+        time.sleep(random.randint(5, 15))
 
         follows_post = {
             'query_id': 17874545323001329,
@@ -120,7 +120,7 @@ def get_followers_list():
         followers_list.append(edge['node'])
 
     while response['data']['user']['edge_followed_by']['page_info']['has_next_page']:
-        time.sleep(random.randint(1, 4))
+        time.sleep(random.randint(5, 15))
 
         followers_post = {
             'query_id': 17851374694183129,
