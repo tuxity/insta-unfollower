@@ -167,17 +167,20 @@ def main():
     if is_logged == False:
         sys.exit('login failed, verify user/password combination')
 
-    print('You\'re now logged as {}'.format(os.environ.get('USERNAME')))
-
     time.sleep(random.randint(1, 3))
 
-    get_user_profile(os.environ.get('USERNAME'))
+    connected_user = get_user_profile(os.environ.get('USERNAME'))
+    print('You\'re now logged as {}'.format(connected_user['username']))
+    print('{} followers'.format(connected_user['followed_by']['count']))
+    print('{} following'.format(connected_user['follows']['count']))
 
     time.sleep(random.randint(2, 6))
 
+    print('building followers list...')
     followers_list = get_followers_list()
     print('found {} followers'.format(len(followers_list)))
 
+    print('building follows list...')
     follows_list = get_follows_list()
     print('found {} following'.format(len(follows_list)))
 
