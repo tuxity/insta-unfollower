@@ -76,7 +76,7 @@ def get_follows_list():
         }
     }
     follows_post['variables'] = json.dumps(follows_post['variables'])
-    response = session.post(query_route, data=follows_post)
+    response = session.get(query_route, params=follows_post)
     response = json.loads(response.text)
 
     for edge in response['data']['user']['edge_follow']['edges']:
@@ -94,7 +94,7 @@ def get_follows_list():
             }
         }
         follows_post['variables'] = json.dumps(follows_post['variables'])
-        response = session.post(query_route, data=follows_post)
+        response = session.get(query_route, params=follows_post)
         response = json.loads(response.text)
 
         for edge in response['data']['user']['edge_follow']['edges']:
@@ -113,7 +113,7 @@ def get_followers_list():
         }
     }
     followers_post['variables'] = json.dumps(followers_post['variables'])
-    response = session.post(query_route, data=followers_post)
+    response = session.get(query_route, params=followers_post)
     response = json.loads(response.text)
 
     for edge in response['data']['user']['edge_followed_by']['edges']:
@@ -131,7 +131,7 @@ def get_followers_list():
             }
         }
         followers_post['variables'] = json.dumps(followers_post['variables'])
-        response = session.post(query_route, data=followers_post)
+        response = session.get(query_route, params=followers_post)
         response = json.loads(response.text)
 
         for edge in response['data']['user']['edge_followed_by']['edges']:
