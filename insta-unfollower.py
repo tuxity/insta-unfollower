@@ -63,7 +63,7 @@ def get_user_profile(username):
     response = session.get(profile_route % (instagram_url, username))
     response = json.loads(response.text)
 
-    return response['user']
+    return response['graphql']['user']
 
 def get_follows_list():
     follows_list = []
@@ -171,8 +171,8 @@ def main():
 
     connected_user = get_user_profile(os.environ.get('USERNAME'))
     print('You\'re now logged as {}'.format(connected_user['username']))
-    print('{} followers'.format(connected_user['followed_by']['count']))
-    print('{} following'.format(connected_user['follows']['count']))
+    print('{} followers'.format(connected_user['edge_followed_by']['count']))
+    print('{} following'.format(connected_user['edge_follow']['count']))
 
     time.sleep(random.randint(2, 6))
 
