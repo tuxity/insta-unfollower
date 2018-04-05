@@ -4,7 +4,7 @@ Insta Unfollower
 [![](https://images.microbadger.com/badges/version/tuxity/insta-unfollower.svg)](https://hub.docker.com/r/tuxity/insta-unfollower/)
 ![](https://images.microbadger.com/badges/image/tuxity/insta-unfollower.svg)
 
-An Instagram script to unfollow accounts you are following and that doesn't follow you back. Without using Instagram API !
+An Instagram script, allowing you to automatically unfollow accounts you are following but that doesn't follow you back. Without using the Instagram API.
 
 ## Installation
 ### With Docker
@@ -19,5 +19,5 @@ USERNAME=myusername PASSWORD=mypassword python3 insta-unfollower.py
 ```
 
 ## Roadmap
-- username whitelist
-- better flow for calculating time between requests to avoid ban
+- Username whitelist.
+- Better flow for calculating time between requests to avoid ban.
