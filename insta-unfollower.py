@@ -7,11 +7,12 @@ import time
 import random
 import requests
 import json
+import re
 
 instagram_url = 'https://www.instagram.com'
 login_route = '%s/accounts/login/ajax/' % (instagram_url)
 logout_route = '%s/accounts/logout/' % (instagram_url)
-profile_route = '%s/%s/?__a=1'
+profile_route = '%s/%s/'
 query_route = '%s/graphql/query/' % (instagram_url)
 unfollow_route = '%s/web/friendships/%s/unfollow/'
 
@@ -61,9 +62,9 @@ def login():
 # Not so useful, it's just to simulate human actions better
 def get_user_profile(username):
     response = session.get(profile_route % (instagram_url, username))
-    response = json.loads(response.text)
-
-    return response['graphql']['user']
+    extract = re.search(r'window._sharedData = (.+);</script>', str(response.text))
+    response = json.loads(extract.group(1))
+    return response['entry_data']['ProfilePage'][0]['graphql']['user']
 
 def get_follows_list():
     follows_list = []
