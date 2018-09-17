@@ -59,6 +59,7 @@ def login():
 
     return reponse_data['authenticated']
 
+
 # Not so useful, it's just to simulate human actions better
 def get_user_profile(username):
     response = session.get(profile_route % (instagram_url, username))
@@ -66,36 +67,81 @@ def get_user_profile(username):
     response = json.loads(extract.group(1))
     return response['entry_data']['ProfilePage'][0]['graphql']['user']
 
-def get_follows_list():
+
+def get_followers_list():
+    followers_list = []
+
+    query_hash = '56066f031e6239f35a904ac20c9f37d9'
+    variables = {
+        'id': session.cookies['ds_user_id'],
+        'first': 50
+    }
+
+    response = session.get(query_route, params={'query_hash': query_hash, 'variables': json.dumps(variables)})
+    while response.status_code != 200:
+        time.sleep(600) # querying too much, sleeping a bit before querying again
+        response = session.get(query_route, params={'query_hash': query_hash, 'variables': json.dumps(variables)})
+
+    print('.', end='', flush=True)
+
+    response = json.loads(response.text)
+
+    for edge in response['data']['user']['edge_followed_by']['edges']:
+        followers_list.append(edge['node'])
+
+    while response['data']['user']['edge_followed_by']['page_info']['has_next_page']:
+        variables['after'] = response['data']['user']['edge_followed_by']['page_info']['end_cursor']
+
+        time.sleep(2)
+
+        response = session.get(query_route, params={'query_hash': query_hash, 'variables': json.dumps(variables)})
+        while response.status_code != 200:
+            time.sleep(600) # querying too much, sleeping a bit before querying again
+            response = session.get(query_route, params={'query_hash': query_hash, 'variables': json.dumps(variables)})
+
+        print('.', end='', flush=True)
+
+        response = json.loads(response.text)
+
+        for edge in response['data']['user']['edge_followed_by']['edges']:
+            followers_list.append(edge['node'])
+
+    return followers_list
+
+
+def get_following_list():
     follows_list = []
 
-    follows_post = {
-        'query_id': 17874545323001329,
-        'variables': {
-            'id': session.cookies['ds_user_id'],
-            'first': 20
-        }
+    query_hash = '58712303d941c6855d4e888c5f0cd22f'
+    variables = {
+        'id': session.cookies['ds_user_id'],
+        'first': 50
     }
-    follows_post['variables'] = json.dumps(follows_post['variables'])
-    response = session.get(query_route, params=follows_post)
+
+    response = session.get(query_route, params={'query_hash': query_hash, 'variables': json.dumps(variables)})
+    while response.status_code != 200:
+        time.sleep(600) # querying too much, sleeping a bit before querying again
+        response = session.get(query_route, params={'query_hash': query_hash, 'variables': json.dumps(variables)})
+
+    print('.', end='', flush=True)
+
     response = json.loads(response.text)
 
     for edge in response['data']['user']['edge_follow']['edges']:
         follows_list.append(edge['node'])
 
     while response['data']['user']['edge_follow']['page_info']['has_next_page']:
-        time.sleep(random.randint(5, 15))
+        variables['after'] = response['data']['user']['edge_follow']['page_info']['end_cursor']
 
-        follows_post = {
-            'query_id': 17874545323001329,
-            'variables': {
-                'id': session.cookies['ds_user_id'],
-                'first': 10,
-                'after': response['data']['user']['edge_follow']['page_info']['end_cursor']
-            }
-        }
-        follows_post['variables'] = json.dumps(follows_post['variables'])
-        response = session.get(query_route, params=follows_post)
+        time.sleep(2)
+
+        response = session.get(query_route, params={'query_hash': query_hash, 'variables': json.dumps(variables)})
+        while response.status_code != 200:
+            time.sleep(600) # querying too much, sleeping a bit before querying again
+            response = session.get(query_route, params={'query_hash': query_hash, 'variables': json.dumps(variables)})
+
+        print('.', end='', flush=True)
+
         response = json.loads(response.text)
 
         for edge in response['data']['user']['edge_follow']['edges']:
@@ -103,42 +149,6 @@ def get_follows_list():
 
     return follows_list
 
-def get_followers_list():
-    followers_list = []
-
-    followers_post = {
-        'query_id': 17851374694183129,
-        'variables': {
-            'id': session.cookies['ds_user_id'],
-            'first': 20
-        }
-    }
-    followers_post['variables'] = json.dumps(followers_post['variables'])
-    response = session.get(query_route, params=followers_post)
-    response = json.loads(response.text)
-
-    for edge in response['data']['user']['edge_followed_by']['edges']:
-        followers_list.append(edge['node'])
-
-    while response['data']['user']['edge_followed_by']['page_info']['has_next_page']:
-        time.sleep(random.randint(5, 15))
-
-        followers_post = {
-            'query_id': 17851374694183129,
-            'variables': {
-                'id': session.cookies['ds_user_id'],
-                'first': 10,
-                'after': response['data']['user']['edge_followed_by']['page_info']['end_cursor']
-            }
-        }
-        followers_post['variables'] = json.dumps(followers_post['variables'])
-        response = session.get(query_route, params=followers_post)
-        response = json.loads(response.text)
-
-        for edge in response['data']['user']['edge_followed_by']['edges']:
-            followers_list.append(edge['node'])
-
-    return followers_list
 
 def unfollow(user):
     response = session.post(unfollow_route % (instagram_url, user['id']))
@@ -147,6 +157,7 @@ def unfollow(user):
     if response['status'] != 'ok':
         print('ERROR: {}'.format(unfollow.text))
         sys.exit('might be unfollowing too fast, quit to prevent ban...')
+
 
 def logout():
     post_data = {
@@ -168,24 +179,22 @@ def main():
     if is_logged == False:
         sys.exit('login failed, verify user/password combination')
 
-    time.sleep(random.randint(1, 3))
+    time.sleep(random.randint(2, 4))
 
     connected_user = get_user_profile(os.environ.get('USERNAME'))
-    print('You\'re now logged as {}'.format(connected_user['username']))
-    print('{} followers'.format(connected_user['edge_followed_by']['count']))
-    print('{} following'.format(connected_user['edge_follow']['count']))
+    print('You\'re now logged as {} ({} followers, {} following)'.format(connected_user['username'], connected_user['edge_followed_by']['count'], connected_user['edge_follow']['count']))
 
-    time.sleep(random.randint(2, 6))
+    time.sleep(random.randint(2, 4))
 
-    print('building followers list...')
+    print('building followers list...', end='', flush=True)
     followers_list = get_followers_list()
-    print('found {} followers'.format(len(followers_list)))
+    print(' done')
 
-    print('building follows list...')
-    follows_list = get_follows_list()
-    print('found {} following'.format(len(follows_list)))
+    print('building following list...', end='', flush=True)
+    following_list = get_following_list()
+    print(' done')
 
-    unfollow_users_list = [user for user in follows_list if user not in followers_list]
+    unfollow_users_list = [user for user in following_list if user not in followers_list]
     print('you are following {} user(s) who aren\'t following you.'.format(len(unfollow_users_list)))
 
     if len(unfollow_users_list) > 0:
@@ -195,7 +204,7 @@ def main():
             if not os.environ.get('UNFOLLOW_VERIFIED') and user['is_verified'] == True:
                 continue
 
-            time.sleep(random.randint(30, 120))
+            time.sleep(random.randint(2, 4))
 
             print('unfollowing {}'.format(user['username']))
             unfollow(user)
