@@ -20,4 +20,4 @@ USERNAME=myusername PASSWORD=mypassword python3 insta-unfollower.py
 
 ## Roadmap
 - Username whitelist.
-- Better flow for calculating time between requests to avoid ban.
+- Better flow for calculating the time between requests to avoid a ban.
