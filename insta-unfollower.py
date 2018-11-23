@@ -219,7 +219,16 @@ def main():
             time.sleep(random.randint(2, 4))
 
             print('unfollowing {}'.format(user['username']))
-            unfollow(user)
+            
+            sucess = False
+            while sucess == False:
+                try:
+                    unfollow(user)
+                    sucess = True
+                except:
+                    unfollow(user)
+                    sucess = False
+                
 
     is_logged_out = logout()
     if is_logged_out:
