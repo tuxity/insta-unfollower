@@ -220,13 +220,13 @@ def main():
 
             print('unfollowing {}'.format(user['username']))
             
-            sucess = False
+            sucess = False #Unfollow ok or not
             while sucess == False:
                 try:
-                    unfollow(user)
+                    unfollow(user)#Try to unfollow user
                     sucess = True
                 except:
-                    unfollow(user)
+                    sleep(1000) #This number could be smaller, but 1000 should work ;)
                     sucess = False
                 
 
