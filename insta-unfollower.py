@@ -226,7 +226,7 @@ def main():
                     unfollow(user)#Try to unfollow user
                     sucess = True
                 except:
-                    sleep(1000) #This number could be smaller, but 1000 should work ;)
+                    time.sleep(1000) #This number could be smaller, but 1000 should work ;)
                     sucess = False
                 
 
