@@ -38,8 +38,9 @@ def login():
     })
 
     reponse = session.get(instagram_url)
+    csrf_token = re.search('(?<=\"csrf_token\":\")\w+', reponse.text).group(0)
     session.headers.update({
-        'X-CSRFToken': reponse.cookies['csrftoken']
+        'X-CSRFToken': csrf_token
     })
 
     time.sleep(random.randint(2, 6))
