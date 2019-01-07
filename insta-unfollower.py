@@ -167,8 +167,10 @@ def unfollow(user):
     response = json.loads(response.text)
 
     if response['status'] != 'ok':
+        print('Error while trying to unfollow {}. Retrying in a bit...'.format(user['username']))
         print('ERROR: {}'.format(unfollow.text))
-        sys.exit('might be unfollowing too fast, quit to prevent ban...')
+        return False
+    return True
 
 
 def logout():
@@ -178,9 +180,9 @@ def logout():
 
     logout = session.post(logout_route, data=post_data)
 
-    if logout.status_code == 200:
-        return True
-    return False
+    if logout.status_code != 200:
+        return False
+    return True
 
 
 def main():
@@ -219,16 +221,10 @@ def main():
             time.sleep(random.randint(2, 4))
 
             print('unfollowing {}'.format(user['username']))
-            
-            sucess = False #Unfollow ok or not
-            while sucess == False:
-                try:
-                    unfollow(user)#Try to unfollow user
-                    sucess = True
-                except:
-                    time.sleep(1000) #This number could be smaller, but 1000 should work ;)
-                    sucess = False
-                
+
+            while unfollow(user) == False:
+                time.sleep(random.randint(1, 3) * 1000) # High number on purpose
+
 
     is_logged_out = logout()
     if is_logged_out:
