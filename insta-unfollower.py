@@ -51,11 +51,16 @@ def login():
 
     response = session.post(login_route, data=post_data, allow_redirects=True)
     response_data = json.loads(response.text)
-
-    if response_data['authenticated']:
-        session.headers.update({
-            'X-CSRFToken': response.cookies['csrftoken']
-        })
+    
+    try:
+        if response_data['authenticated']:
+            session.headers.update({
+                'X-CSRFToken': response.cookies['csrftoken']
+            })
+    except:
+        print ('Your IP is blocked')
+        sys.exit()
+        
 
     return response_data['authenticated']
 
