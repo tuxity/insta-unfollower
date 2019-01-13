@@ -48,7 +48,7 @@ def login():
         'username': os.environ.get('USERNAME'),
         'password': os.environ.get('PASSWORD')
     }
-
+        
     response = session.post(login_route, data=post_data, allow_redirects=True)
     response_data = json.loads(response.text)
 
@@ -200,20 +200,30 @@ def main():
 
     time.sleep(random.randint(2, 4))
 
-    print('building followers list...', end='', flush=True)
-    followers_list = get_followers_list()
-    print(' done')
+    if os.environ.get('BLACKLIST') == None:
+        print('building followers list...', end='', flush=True)
+        followers_list = get_followers_list()
+        print(' done')
+    
+        print('building following list...', end='', flush=True)
+        following_list = get_following_list()
+        print(' done')
+        unfollow_users_list = [user for user in following_list if user not in followers_list]
+    else:
+        filename = os.environ.get('BLACKLIST')
+        with open(filename) as my_file:
+            unfollow_users_list = json.load(my_file)
 
-    print('building following list...', end='', flush=True)
-    following_list = get_following_list()
-    print(' done')
-
-    unfollow_users_list = [user for user in following_list if user not in followers_list]
+    
     print('you are following {} user(s) who aren\'t following you.'.format(len(unfollow_users_list)))
 
     if len(unfollow_users_list) > 0:
         print('Begin to unfollow users...')
-
+        
+        #Save unfollow users list
+        with open('data.json', 'w') as outfile:
+            json.dump(unfollow_users_list, outfile)
+        
         for user in unfollow_users_list:
             if not os.environ.get('UNFOLLOW_VERIFIED') and user['is_verified'] == True:
                 continue
