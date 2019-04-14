@@ -5,9 +5,12 @@ import os
 import sys
 import time
 import random
-import requests
+import requests, pickle
 import json
 import re
+
+cache_dir = 'cache'
+session_cache = '%s/session.txt' % (cache_dir)
 
 instagram_url = 'https://www.instagram.com'
 login_route = '%s/accounts/login/ajax/' % (instagram_url)
@@ -193,11 +196,18 @@ def main():
     if not os.environ.get('USERNAME') or not os.environ.get('PASSWORD'):
         sys.exit('please provide USERNAME and PASSWORD environement variables. Abording...')
 
-    is_logged = login()
-    if is_logged == False:
-        sys.exit('login failed, verify user/password combination')
+    if os.path.isfile(session_cache):
+        with open(session_cache, 'rb') as f:
+            session.cookies.update(pickle.load(f))
+    else:
+        is_logged = login()
+        if is_logged == False:
+            sys.exit('login failed, verify user/password combination')
 
-    time.sleep(random.randint(2, 4))
+        with open(session_cache, 'wb') as f:
+            pickle.dump(session.cookies, f)
+
+        time.sleep(random.randint(2, 4))
 
     connected_user = get_user_profile(os.environ.get('USERNAME'))
     print('You\'re now logged as {} ({} followers, {} following)'.format(connected_user['username'], connected_user['edge_followed_by']['count'], connected_user['edge_follow']['count']))
