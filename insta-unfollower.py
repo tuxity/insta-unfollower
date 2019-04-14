@@ -52,6 +52,10 @@ def login():
     response = session.post(login_route, data=post_data, allow_redirects=True)
     response_data = json.loads(response.text)
 
+    if 'two_factor_required' in response_data:
+        print('Please disable 2-factor authentication to login.')
+        sys.exit(1)
+
     if response_data['authenticated']:
         session.headers.update({
             'X-CSRFToken': response.cookies['csrftoken']
@@ -224,7 +228,6 @@ def main():
 
             while unfollow(user) == False:
                 time.sleep(random.randint(1, 3) * 1000) # High number on purpose
-
 
     is_logged_out = logout()
     if is_logged_out:
