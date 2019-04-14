@@ -196,6 +196,9 @@ def main():
     if not os.environ.get('USERNAME') or not os.environ.get('PASSWORD'):
         sys.exit('please provide USERNAME and PASSWORD environement variables. Abording...')
 
+    if not os.path.isdir(cache_dir):
+        os.makedirs(cache_dir)
+
     if os.path.isfile(session_cache):
         with open(session_cache, 'rb') as f:
             session.cookies.update(pickle.load(f))
