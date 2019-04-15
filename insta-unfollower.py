@@ -11,6 +11,8 @@ import re
 
 cache_dir = 'cache'
 session_cache = '%s/session.txt' % (cache_dir)
+followers_cache = '%s/followers.json' % (cache_dir)
+following_cache = '%s/following.json' % (cache_dir)
 
 instagram_url = 'https://www.instagram.com'
 login_route = '%s/accounts/login/ajax/' % (instagram_url)
@@ -217,13 +219,39 @@ def main():
 
     time.sleep(random.randint(2, 4))
 
-    print('building followers list...', end='', flush=True)
-    followers_list = get_followers_list()
-    print(' done')
+    following_list = []
+    if os.path.isfile(following_cache):
+        with open(following_cache, 'r') as f:
+            following_list = json.load(f)
+            print('following list loaded from cache file')
 
-    print('building following list...', end='', flush=True)
-    following_list = get_following_list()
-    print(' done')
+    if len(following_list) != connected_user['edge_follow']['count']:
+        if len(following_list) > 0:
+            print('rebuilding following list...', end='', flush=True)
+        else:
+            print('building following list...', end='', flush=True)
+        following_list = get_following_list()
+        print(' done')
+
+        with open(following_cache, 'w') as f:
+            json.dump(following_list, f)
+
+    followers_list = []
+    if os.path.isfile(followers_cache):
+        with open(followers_cache, 'r') as f:
+            followers_list = json.load(f)
+            print('followers list loaded from cache file')
+
+    if len(followers_list) != connected_user['edge_followed_by']['count']:
+        if len(following_list) > 0:
+            print('rebuilding followers list...', end='', flush=True)
+        else:
+            print('building followers list...', end='', flush=True)
+        followers_list = get_followers_list()
+        print(' done')
+
+        with open(followers_cache, 'w') as f:
+            json.dump(followers_list, f)
 
     unfollow_users_list = [user for user in following_list if user not in followers_list]
     print('you are following {} user(s) who aren\'t following you.'.format(len(unfollow_users_list)))
