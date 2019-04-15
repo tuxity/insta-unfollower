@@ -254,7 +254,9 @@ def main():
             json.dump(followers_list, f)
 
     unfollow_users_list = [user for user in following_list if user not in followers_list]
-    print('you are following {} user(s) who aren\'t following you.'.format(len(unfollow_users_list)))
+    print('you are following {} user(s) who aren\'t following you:'.format(len(unfollow_users_list)))
+    for user in unfollow_users_list:
+        print(user['username'])
 
     if len(unfollow_users_list) > 0:
         print('Begin to unfollow users...')
@@ -265,10 +267,10 @@ def main():
 
             time.sleep(random.randint(2, 4))
 
-            print('unfollowing {}'.format(user['username']))
-
             while unfollow(user) == False:
                 time.sleep(random.randint(1, 3) * 1000) # High number on purpose
+
+        print(' done')
 
     is_logged_out = logout()
     if is_logged_out:
