@@ -174,6 +174,8 @@ def unfollow(user):
 
     response = session.post(unfollow_route % (instagram_url, user['id']))
     response = json.loads(response.text)
+    
+    print('Trying to unfollow {}.'.format(user['username']))
 
     if response['status'] != 'ok':
         print('Error while trying to unfollow {}. Retrying in a bit...'.format(user['username']))
