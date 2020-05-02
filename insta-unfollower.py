@@ -43,9 +43,14 @@ def login():
     })
 
     reponse = session.get(instagram_url)
-    session.headers.update({
-        'X-CSRFToken': reponse.cookies['csrftoken']
-    })
+
+    if 'csrftoken' in reponse.cookies:
+        session.headers.update({
+            'X-CSRFToken': reponse.cookies['csrftoken']
+        })
+    else:
+        print("No csrf token found in cookies, maybe you are temp ban? Wait 1 hour and retry")
+        return False
 
     time.sleep(random.randint(2, 6))
 
