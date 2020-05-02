@@ -1,4 +1,4 @@
-FROM python:3.6-alpine
+FROM python:3.8-alpine
 LABEL maintainer="Kévin Darcel <tuxity@users.noreply.github.com>"
 
 WORKDIR /usr/src/insta-unfollower
