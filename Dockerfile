@@ -1,5 +1,5 @@
 FROM python:3.6-alpine
-MAINTAINER Kévin Darcel <kevin.darcel@gmail.com>
+LABEL maintainer="Kévin Darcel <tuxity@users.noreply.github.com>"
 
 WORKDIR /usr/src/insta-unfollower
 
