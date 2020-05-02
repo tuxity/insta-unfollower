@@ -10,12 +10,12 @@ An Instagram script, allowing you to automatically unfollow accounts you are fol
 ### With Docker
 ```
 docker pull tuxity/insta-unfollower:latest
-docker run -d -v $(pwd)/cache:/usr/src/insta-unfollower/cache --env USERNAME=myusername --env PASSWORD=mypassword tuxity/insta-unfollower:latest
+docker run -d -v $(pwd)/cache:/usr/src/insta-unfollower/cache --env INSTA_USERNAME=myusername --env INSTA_PASSWORD=mypassword tuxity/insta-unfollower:latest
 ```
 
 ### Without Docker
 ```
-USERNAME=myusername PASSWORD=mypassword python3 insta-unfollower.py
+INSTA_USERNAME=myusername INSTA_PASSWORD=mypassword python3 insta-unfollower.py
 ```
 
 ## Roadmap

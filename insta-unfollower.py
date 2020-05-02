@@ -50,8 +50,8 @@ def login():
     time.sleep(random.randint(2, 6))
 
     post_data = {
-        'username': os.environ.get('USERNAME'),
-        'password': os.environ.get('PASSWORD')
+        'username': os.environ.get('INSTA_USERNAME'),
+        'password': os.environ.get('INSTA_PASSWORD')
     }
 
     response = session.post(login_route, data=post_data, allow_redirects=True)
@@ -195,8 +195,8 @@ def logout():
 
 
 def main():
-    if not os.environ.get('USERNAME') or not os.environ.get('PASSWORD'):
-        sys.exit('please provide USERNAME and PASSWORD environement variables. Abording...')
+    if not os.environ.get('INSTA_USERNAME') or not os.environ.get('INSTA_PASSWORD'):
+        sys.exit('please provide INSTA_USERNAME and INSTA_PASSWORD environement variables. Abording...')
 
     if not os.path.isdir(cache_dir):
         os.makedirs(cache_dir)
@@ -214,7 +214,7 @@ def main():
 
         time.sleep(random.randint(2, 4))
 
-    connected_user = get_user_profile(os.environ.get('USERNAME'))
+    connected_user = get_user_profile(os.environ.get('INSTA_USERNAME'))
     print('You\'re now logged as {} ({} followers, {} following)'.format(connected_user['username'], connected_user['edge_followed_by']['count'], connected_user['edge_follow']['count']))
 
     time.sleep(random.randint(2, 4))
