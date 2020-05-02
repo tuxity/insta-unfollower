@@ -253,7 +253,9 @@ def main():
         with open(followers_cache, 'w') as f:
             json.dump(followers_list, f)
 
-    unfollow_users_list = [user for user in following_list if user not in followers_list]
+    followers_usernames = {user['username'] for user in followers_list}
+    unfollow_users_list = [user for user in following_list if user['username'] not in followers_usernames]
+
     print('you are following {} user(s) who aren\'t following you:'.format(len(unfollow_users_list)))
     for user in unfollow_users_list:
         print(user['username'])
