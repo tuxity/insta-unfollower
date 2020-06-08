@@ -56,7 +56,7 @@ def login():
 
     post_data = {
         'username': os.environ.get('INSTA_USERNAME'),
-        'password': os.environ.get('INSTA_PASSWORD')
+        'enc_password': '#PWD_INSTAGRAM_BROWSER:0:1590954226:' + os.environ.get('INSTA_Password')
     }
 
     response = session.post(login_route, data=post_data, allow_redirects=True)
