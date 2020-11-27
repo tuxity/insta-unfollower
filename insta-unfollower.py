@@ -200,7 +200,8 @@ def logout():
 
 
 def main():
-    if  len(sys.argv) == 0:
+    print(len(sys.argv))
+    if  len(sys.argv) == 1:
         sys.exit('Please provide a username and password as such: ./insta-unfollower.py USERNAME PASSWORD')
 
     if not os.path.isdir(cache_dir):
