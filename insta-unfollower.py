@@ -55,8 +55,8 @@ def login():
     time.sleep(random.randint(2, 6))
 
     post_data = {
-        'username': sys.argv[0],
-        'password': sys.argv[1]
+        'username': sys.argv[1],
+        'enc_password': '#PWD_INSTAGRAM_BROWSER:0:1590954226:' + sys.argv[2]
     }
 
     response = session.post(login_route, data=post_data, allow_redirects=True)
@@ -200,8 +200,7 @@ def logout():
 
 
 def main():
-    print(len(sys.argv))
-    if  len(sys.argv) == 1:
+    if  len(sys.argv) <= 1:
         sys.exit('Please provide a username and password as such: ./insta-unfollower.py USERNAME PASSWORD')
 
     if not os.path.isdir(cache_dir):
