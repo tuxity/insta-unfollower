@@ -186,7 +186,7 @@ def unfollow(user):
 
     if response['status'] != 'ok':
         print('Error while trying to unfollow {}. Retrying in a bit...'.format(user['username']))
-        print('ERROR: {}'.format(unfollow.text))
+        print('ERROR: {}'.format(response.text))
         return False
     return True
 
