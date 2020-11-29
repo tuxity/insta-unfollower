@@ -16,6 +16,8 @@ docker run -d -v $(pwd)/cache:/usr/src/insta-unfollower/cache --env INSTA_USERNA
 ### Without Docker
 ```
 INSTA_USERNAME=myusername INSTA_PASSWORD=mypassword python3 insta-unfollower.py
+Or
+python3 insta-unfollow.py USERNAME PASSWORD
 ```
 
 ## Roadmap
