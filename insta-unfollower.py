@@ -200,8 +200,8 @@ def logout():
 
 
 def main():
-    if  len(sys.argv) <= 1:
-        sys.exit('Please provide a username and password as such: ./insta-unfollower.py USERNAME PASSWORD')
+    if (not os.environ.get('INSTA_USERNAME') or not os.environ.get('INSTA_PASSWORD')) and len(sys.argv) <= 1: 
+            sys.exit('please provide INSTA_USERNAME and INSTA_PASSWORD environement variables or as an argument as such: ./insta-unfollower.py USERNAME PASSWORD.\nAborting...')
 
     if not os.path.isdir(cache_dir):
         os.makedirs(cache_dir)
