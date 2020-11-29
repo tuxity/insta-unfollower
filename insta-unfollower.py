@@ -53,12 +53,14 @@ def login():
         return False
 
     time.sleep(random.randint(2, 6))
-
-    post_data = {
-        'username': sys.argv[1],
-        'enc_password': '#PWD_INSTAGRAM_BROWSER:0:1590954226:' + sys.argv[2]
-    }
-
+    if len(sys.argv) > 1:
+        post_data = {
+            'username': sys.argv[1],
+            'enc_password': '#PWD_INSTAGRAM_BROWSER:0:1590954226:' + sys.argv[2]
+        }
+    else:
+        'username': os.environ.get('INSTA_USERNAME'),
+        'password': os.environ.get('INSTA_PASSWORD')
     response = session.post(login_route, data=post_data, allow_redirects=True)
     response_data = json.loads(response.text)
 
@@ -219,7 +221,11 @@ def main():
 
         time.sleep(random.randint(2, 4))
 
-    connected_user = sys.argv[1]
+    if len(sys.argv) > 1:
+        connected_user = sys.argv[1]
+    else: 
+        get_user_profile(os.environ.get('INSTA_USERNAME'))
+
     print('You\'re now logged as {} ({} followers, {} following)'.format(connected_user['username'], connected_user['edge_followed_by']['count'], connected_user['edge_follow']['count']))
 
     time.sleep(random.randint(2, 4))
