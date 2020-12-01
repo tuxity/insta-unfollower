@@ -85,7 +85,7 @@ def login():
         session.headers.update({
             'X-CSRFToken': response.cookies['csrftoken']
         })
-    print(response_data['authenticated'])
+
     return response_data['authenticated']
 
 
@@ -215,7 +215,7 @@ def logout():
 
 
 def main():
-    print(credentials.username + " " + credentials.password)
+
     if not os.path.isdir(cache_dir):
         os.makedirs(cache_dir)
 
@@ -232,7 +232,7 @@ def main():
 
         time.sleep(random.randint(2, 4))
 
-    connected_user = get_user_profile(credentials.password)
+    connected_user = get_user_profile(credentials.username)
 
     print('You\'re now logged as {} ({} followers, {} following)'.format(connected_user['username'], connected_user['edge_followed_by']['count'], connected_user['edge_follow']['count']))
 
