@@ -67,7 +67,7 @@ def login():
         return False
 
     time.sleep(random.randint(2, 6))
-    
+
     post_data = {
         'username': credentials.username,
         'enc_password': '#PWD_INSTAGRAM_BROWSER:0:1590954226:' + credentials.password
@@ -75,7 +75,6 @@ def login():
 
     response = session.post(login_route, data=post_data, allow_redirects=True)
     response_data = json.loads(response.text)
-
 
     if 'two_factor_required' in response_data:
         print('Please disable 2-factor authentication to login.')
