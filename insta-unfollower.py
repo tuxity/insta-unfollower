@@ -23,6 +23,20 @@ unfollow_route = '%s/web/friendships/%s/unfollow/'
 
 session = requests.Session()
 
+
+class Credentials:
+    def __init__(self):
+        if os.environ.get('INSTA_USERNAME') and os.environ.get('INSTA_PASSWORD'):
+            self.username = os.environ.get('INSTA_USERNAME')
+            self.password = os.environ.get('INSTA_PASSWORD')
+        elif len(sys.argv) > 1:
+            self.username = sys.argv[1]
+            self.password = sys.argv[2]
+        else: 
+            sys.exit('Please provide INSTA_USERNAME and INSTA_PASSWORD environement variables or as an argument as such: ./insta-unfollower.py USERNAME PASSWORD.\nAborting...')
+
+credentials = Credentials() 
+
 def login():
     session.headers.update({
         'Accept-Encoding': 'gzip, deflate',
@@ -53,18 +67,15 @@ def login():
         return False
 
     time.sleep(random.randint(2, 6))
-    if len(sys.argv) > 1:
-        post_data = {
-            'username': sys.argv[1],
-            'enc_password': '#PWD_INSTAGRAM_BROWSER:0:1590954226:' + sys.argv[2]
-        }
-    else:
-        post_data = {
-        'username': os.environ.get('INSTA_USERNAME'),
-        'password': os.environ.get('INSTA_PASSWORD')
-        }
+    
+    post_data = {
+        'username': credentials.username,
+        'enc_password': '#PWD_INSTAGRAM_BROWSER:0:1590954226:' + credentials.password
+    }
+
     response = session.post(login_route, data=post_data, allow_redirects=True)
     response_data = json.loads(response.text)
+
 
     if 'two_factor_required' in response_data:
         print('Please disable 2-factor authentication to login.')
@@ -74,7 +85,7 @@ def login():
         session.headers.update({
             'X-CSRFToken': response.cookies['csrftoken']
         })
-
+    print(response_data['authenticated'])
     return response_data['authenticated']
 
 
@@ -204,9 +215,7 @@ def logout():
 
 
 def main():
-    if (not os.environ.get('INSTA_USERNAME') or not os.environ.get('INSTA_PASSWORD')) and len(sys.argv) <= 1: 
-            sys.exit('please provide INSTA_USERNAME and INSTA_PASSWORD environement variables or as an argument as such: ./insta-unfollower.py USERNAME PASSWORD.\nAborting...')
-
+    print(credentials.username + " " + credentials.password)
     if not os.path.isdir(cache_dir):
         os.makedirs(cache_dir)
 
@@ -223,10 +232,7 @@ def main():
 
         time.sleep(random.randint(2, 4))
 
-    if len(sys.argv) > 1:
-        connected_user = sys.argv[1]
-    else: 
-        get_user_profile(os.environ.get('INSTA_USERNAME'))
+    connected_user = get_user_profile(credentials.password)
 
     print('You\'re now logged as {} ({} followers, {} following)'.format(connected_user['username'], connected_user['edge_followed_by']['count'], connected_user['edge_follow']['count']))
 
