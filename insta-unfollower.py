@@ -23,6 +23,20 @@ unfollow_route = '%s/web/friendships/%s/unfollow/'
 
 session = requests.Session()
 
+
+class Credentials:
+    def __init__(self):
+        if os.environ.get('INSTA_USERNAME') and os.environ.get('INSTA_PASSWORD'):
+            self.username = os.environ.get('INSTA_USERNAME')
+            self.password = os.environ.get('INSTA_PASSWORD')
+        elif len(sys.argv) > 1:
+            self.username = sys.argv[1]
+            self.password = sys.argv[2]
+        else: 
+            sys.exit('Please provide INSTA_USERNAME and INSTA_PASSWORD environement variables or as an argument as such: ./insta-unfollower.py USERNAME PASSWORD.\nAborting...')
+
+credentials = Credentials() 
+
 def login():
     session.headers.update({
         'Accept-Encoding': 'gzip, deflate',
@@ -55,8 +69,8 @@ def login():
     time.sleep(random.randint(2, 6))
 
     post_data = {
-        'username': os.environ.get('INSTA_USERNAME'),
-        'password': os.environ.get('INSTA_PASSWORD')
+        'username': credentials.username,
+        'enc_password': '#PWD_INSTAGRAM_BROWSER:0:1590954226:' + credentials.password
     }
 
     response = session.post(login_route, data=post_data, allow_redirects=True)
@@ -182,7 +196,7 @@ def unfollow(user):
 
     if response['status'] != 'ok':
         print('Error while trying to unfollow {}. Retrying in a bit...'.format(user['username']))
-        print('ERROR: {}'.format(unfollow.text))
+        print('ERROR: {}'.format(response.text))
         return False
     return True
 
@@ -200,8 +214,6 @@ def logout():
 
 
 def main():
-    if not os.environ.get('INSTA_USERNAME') or not os.environ.get('INSTA_PASSWORD'):
-        sys.exit('please provide INSTA_USERNAME and INSTA_PASSWORD environement variables. Abording...')
 
     if not os.path.isdir(cache_dir):
         os.makedirs(cache_dir)
@@ -219,7 +231,8 @@ def main():
 
         time.sleep(random.randint(2, 4))
 
-    connected_user = get_user_profile(os.environ.get('INSTA_USERNAME'))
+    connected_user = get_user_profile(credentials.username)
+
     print('You\'re now logged as {} ({} followers, {} following)'.format(connected_user['username'], connected_user['edge_followed_by']['count'], connected_user['edge_follow']['count']))
 
     time.sleep(random.randint(2, 4))
