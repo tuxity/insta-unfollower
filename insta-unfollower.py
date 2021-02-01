@@ -274,10 +274,12 @@ def main():
 
         for user in unfollow_users_list:
             if not os.environ.get('UNFOLLOW_VERIFIED') and user['is_verified'] == True:
+                print('Skipping {}...'.format(user['username']))
                 continue
 
             time.sleep(random.randint(2, 4))
 
+            print('Unfollowing {}...'.format(user['username']))
             while unfollow(user) == False:
                 time.sleep(random.randint(1, 3) * 1000) # High number on purpose
 
