@@ -32,11 +32,10 @@ class Credentials:
         elif len(sys.argv) > 1:
             self.username = sys.argv[1]
             self.password = sys.argv[2]
-        else: 
+        else:
             sys.exit('Please provide INSTA_USERNAME and INSTA_PASSWORD environement variables or as an argument as such: ./insta-unfollower.py USERNAME PASSWORD.\nAborting...')
 
-credentials = Credentials() 
-
+credentials = Credentials()
 def login():
     session.headers.update({
         'Accept-Encoding': 'gzip, deflate',
@@ -46,21 +45,18 @@ def login():
         'Host': 'www.instagram.com',
         'Origin': 'https://www.instagram.com',
         'Referer': 'https://www.instagram.com/',
-        'User-Agent': ('Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 \
-            (KHTML, like Gecko) Chrome/48.0.2564.103 Safari/537.36'),
-        'X-Instagram-AJAX': '1',
+        'User-Agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 \
+            (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36'),
+        'X-Instagram-AJAX': '7a3a3e64fa87',
         'X-Requested-With': 'XMLHttpRequest'
-    })
-    session.cookies.update({
-        'ig_pr': '1',
-        'ig_vw': '1920',
     })
 
     reponse = session.get(instagram_url)
 
-    if 'csrftoken' in reponse.cookies:
+    csrf = re.findall(r"csrf_token\":\"(.*?)\"", reponse.text)[0]
+    if csrf:
         session.headers.update({
-            'X-CSRFToken': reponse.cookies['csrftoken']
+            'x-csrftoken': csrf
         })
     else:
         print("No csrf token found in cookies, maybe you are temp ban? Wait 1 hour and retry")
@@ -70,7 +66,7 @@ def login():
 
     post_data = {
         'username': credentials.username,
-        'enc_password': '#PWD_INSTAGRAM_BROWSER:0:1590954226:' + credentials.password
+        'enc_password': '#PWD_INSTAGRAM_BROWSER:0:1612195807:' + credentials.password
     }
 
     response = session.post(login_route, data=post_data, allow_redirects=True)
@@ -79,11 +75,6 @@ def login():
     if 'two_factor_required' in response_data:
         print('Please disable 2-factor authentication to login.')
         sys.exit(1)
-
-    if response_data['authenticated']:
-        session.headers.update({
-            'X-CSRFToken': response.cookies['csrftoken']
-        })
 
     return response_data['authenticated']
 
@@ -188,7 +179,7 @@ def unfollow(user):
 
     # update header again, idk why it changed
     session.headers.update({
-        'X-CSRFToken': response.cookies['csrftoken']
+        'x-csrftoken': response.cookies['csrftoken']
     })
 
     response = session.post(unfollow_route % (instagram_url, user['id']))
