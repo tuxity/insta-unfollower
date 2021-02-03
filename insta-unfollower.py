@@ -8,6 +8,7 @@ import random
 import requests, pickle
 import json
 import re
+from datetime import datetime
 
 cache_dir = 'cache'
 session_cache = '%s/session.txt' % (cache_dir)
@@ -66,7 +67,7 @@ def login():
 
     post_data = {
         'username': credentials.username,
-        'enc_password': '#PWD_INSTAGRAM_BROWSER:0:1612195807:' + credentials.password
+        'enc_password': '#PWD_INSTAGRAM_BROWSER:0:{}:{}'.format(int(datetime.now().timestamp()), credentials.password)
     }
 
     response = session.post(login_route, data=post_data, allow_redirects=True)
