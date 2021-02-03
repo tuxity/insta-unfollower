@@ -17,7 +17,6 @@ following_cache = '%s/following.json' % (cache_dir)
 
 instagram_url = 'https://www.instagram.com'
 login_route = '%s/accounts/login/ajax/' % (instagram_url)
-logout_route = '%s/accounts/logout/' % (instagram_url)
 profile_route = '%s/%s/'
 query_route = '%s/graphql/query/' % (instagram_url)
 unfollow_route = '%s/web/friendships/%s/unfollow/'
@@ -193,18 +192,6 @@ def unfollow(user):
     return True
 
 
-def logout():
-    post_data = {
-        'csrfmiddlewaretoken': session.cookies['csrftoken']
-    }
-
-    logout = session.post(logout_route, data=post_data)
-
-    if logout.status_code != 200:
-        return False
-    return True
-
-
 def main():
 
     if not os.path.isdir(cache_dir):
@@ -285,10 +272,6 @@ def main():
                 time.sleep(random.randint(1, 3) * 1000) # High number on purpose
 
         print(' done')
-
-    is_logged_out = logout()
-    if is_logged_out:
-        sys.exit(0)
 
 
 if __name__ == "__main__":
