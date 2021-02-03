@@ -76,6 +76,10 @@ def login():
         print('Please disable 2-factor authentication to login.')
         sys.exit(1)
 
+    if 'message' in response_data and response_data['message'] == 'checkpoint_required':
+        print('Please check Instagram app for a security confirmation that it is you trying to login.')
+        sys.exit(1)
+
     return response_data['authenticated']
 
 
