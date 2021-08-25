@@ -274,7 +274,7 @@ def main():
                 print('Skipping {}...'.format(user['username']))
                 continue
 
-            time.sleep(random.randint(2, 4))
+            time.sleep(random.randint(5, 10))
 
             print('Unfollowing {}...'.format(user['username']))
             while unfollow(user) == False:
