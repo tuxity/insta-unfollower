@@ -187,6 +187,11 @@ def unfollow(user):
     })
 
     response = session.post(unfollow_route % (instagram_url, user['id']))
+
+    if response.status_code == 429: # Too many requests
+        print('Temporary ban from Instagram. Grab a coffee watch a TV show and comeback later. I will try again...')
+        return False
+
     response = json.loads(response.text)
 
     if response['status'] != 'ok':
@@ -273,7 +278,9 @@ def main():
 
             print('Unfollowing {}...'.format(user['username']))
             while unfollow(user) == False:
-                time.sleep(random.randint(1, 3) * 1000) # High number on purpose
+                sleep_time = random.randint(1, 3) * 1000 # High number on purpose
+                print('Sleeping for {} seconds'.format(sleep_time))
+                time.sleep(sleep_time)
 
         print(' done')
 
