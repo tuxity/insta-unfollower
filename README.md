@@ -20,8 +20,11 @@ Or
 python3 insta-unfollower.py USERNAME PASSWORD
 ```
 
+### Allow list
+Update allow.csv with a list of usernames to allow/ignore for un-following. One username per line.
+
 ## Roadmap
-- Username whitelist.
 - Better flow for calculating time between requests to avoid ban.
+- ~~Username whitelist.~~ done
 - ~~Avoid re-log on instagram everytime when we run the script~~ done
 - ~~Keep followers and following lists in cache to speedup execution~~ done
