@@ -8,11 +8,13 @@ import random
 import requests, pickle
 import json
 import re
+import csv
 from datetime import datetime
 
 cache_dir = 'cache'
 session_cache = '%s/session.txt' % (cache_dir)
 followers_cache = '%s/followers.json' % (cache_dir)
+safe_followers_cache = '%s/safe_followers.json' % (cache_dir)
 following_cache = '%s/following.json' % (cache_dir)
 
 instagram_url = 'https://www.instagram.com'
@@ -90,6 +92,15 @@ def get_user_profile(username):
     response = json.loads(extract.group(1))
     return response['entry_data']['ProfilePage'][0]['graphql']['user']
 
+def get_allow_list():
+    allow_list = []
+    with open('allow.csv') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        for row in csv_reader:
+            allow_list.append(row[0])
+    return allow_list
+            
 
 def get_followers_list():
     followers_list = []
@@ -179,7 +190,7 @@ def get_following_list():
 
 def unfollow(user):
     response = session.get(profile_route % (instagram_url, user['username']))
-    time.sleep(random.randint(2, 4))
+    time.sleep(random.randint(2, 8))
 
     # update header again, idk why it changed
     session.headers.update({
@@ -236,7 +247,7 @@ def main():
             print('rebuilding following list...', end='', flush=True)
         else:
             print('building following list...', end='', flush=True)
-        following_list = get_following_list()
+        following_list = [x for x in get_following_list() if x['username'] not in get_allow_list()]
         print(' done')
 
         with open(following_cache, 'w') as f:
