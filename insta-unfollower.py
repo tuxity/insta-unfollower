@@ -94,7 +94,7 @@ def get_user_profile(username):
 
 def get_allow_list():
     allow_list = []
-    with open('allow.csv') as csv_file:
+    with open('allowlist.csv') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
         for row in csv_reader:
