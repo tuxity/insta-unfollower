@@ -279,7 +279,8 @@ def main():
             print('Unfollowing {}...'.format(user['username']))
             while unfollow(user) == False:
                 sleep_time = random.randint(1, 3) * 1000 # High number on purpose
-                print('Sleeping for {} seconds'.format(sleep_time))
+                start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                print('Sleeping for {} seconds on {}'.format(sleep_time, start_time))
                 time.sleep(sleep_time)
 
         print(' done')
