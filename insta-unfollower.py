@@ -178,6 +178,9 @@ def get_following_list():
 
 
 def unfollow(user):
+    if os.environ.get('DRY_RUN'):
+        return True
+
     response = session.get(profile_route % (instagram_url, user['username']))
     time.sleep(random.randint(2, 4))
 
@@ -202,6 +205,9 @@ def unfollow(user):
 
 
 def main():
+
+    if os.environ.get('DRY_RUN'):
+        print('DRY RUN MODE, script will not unfollow users!')
 
     if not os.path.isdir(cache_dir):
         os.makedirs(cache_dir)
