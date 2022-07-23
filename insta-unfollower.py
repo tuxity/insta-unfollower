@@ -83,13 +83,6 @@ def login():
     return response_data['authenticated']
 
 
-# Not so useful, it's just to simulate human actions better
-def get_user_profile(username):
-    response = session.get(profile_route % (instagram_url, username))
-    extract = re.search(r'window._sharedData = (.+);</script>', str(response.text))
-    response = json.loads(extract.group(1))
-    return response['entry_data']['ProfilePage'][0]['graphql']['user']
-
 
 def get_followers_list():
     followers_list = []
@@ -225,10 +218,6 @@ def main():
 
         time.sleep(random.randint(2, 4))
 
-    connected_user = get_user_profile(credentials.username)
-
-    print('You\'re now logged as {} ({} followers, {} following)'.format(connected_user['username'], connected_user['edge_followed_by']['count'], connected_user['edge_follow']['count']))
-
     time.sleep(random.randint(2, 4))
 
     following_list = []
@@ -237,16 +226,15 @@ def main():
             following_list = json.load(f)
             print('following list loaded from cache file')
 
-    if len(following_list) != connected_user['edge_follow']['count']:
-        if len(following_list) > 0:
-            print('rebuilding following list...', end='', flush=True)
-        else:
-            print('building following list...', end='', flush=True)
-        following_list = get_following_list()
-        print(' done')
+    if len(following_list) > 0:
+        print('rebuilding following list...', end='', flush=True)
+    else:
+        print('building following list...', end='', flush=True)
+    following_list = get_following_list()
+    print(' done')
 
-        with open(following_cache, 'w') as f:
-            json.dump(following_list, f)
+    with open(following_cache, 'w') as f:
+        json.dump(following_list, f)
 
     followers_list = []
     if os.path.isfile(followers_cache):
@@ -254,16 +242,15 @@ def main():
             followers_list = json.load(f)
             print('followers list loaded from cache file')
 
-    if len(followers_list) != connected_user['edge_followed_by']['count']:
-        if len(following_list) > 0:
-            print('rebuilding followers list...', end='', flush=True)
-        else:
-            print('building followers list...', end='', flush=True)
-        followers_list = get_followers_list()
-        print(' done')
+    if len(following_list) > 0:
+        print('rebuilding followers list...', end='', flush=True)
+    else:
+        print('building followers list...', end='', flush=True)
+    followers_list = get_followers_list()
+    print(' done')
 
-        with open(followers_cache, 'w') as f:
-            json.dump(followers_list, f)
+    with open(followers_cache, 'w') as f:
+        json.dump(followers_list, f)
 
     followers_usernames = {user['username'] for user in followers_list}
     unfollow_users_list = [user for user in following_list if user['username'] not in followers_usernames]
