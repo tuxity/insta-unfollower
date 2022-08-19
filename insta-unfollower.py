@@ -184,10 +184,11 @@ def unfollow(user):
     response = session.get(profile_route % (instagram_url, user['username']))
     time.sleep(random.randint(2, 4))
 
-    # update header again, idk why it changed
-    session.headers.update({
-        'x-csrftoken': response.cookies['csrftoken']
-    })
+    csrf = re.findall(r"csrf_token\":\"(.*?)\"", response.text)[0]
+    if csrf:
+        session.headers.update({
+            'x-csrftoken': csrf
+        })
 
     response = session.post(unfollow_route % (instagram_url, user['id']))
 
