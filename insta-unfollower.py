@@ -38,6 +38,7 @@ class Credentials:
 
 credentials = Credentials()
 
+
 def init():
     headers = {
         'User-Agent': ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36')
@@ -67,6 +68,7 @@ def init():
 
     return headers, cookies
 
+
 def login(headers, cookies):
     post_data = {
         'username': credentials.username,
@@ -87,6 +89,7 @@ def login(headers, cookies):
     return response_data['authenticated'], response.cookies.get_dict()
 
 
+# Note: this endpoint results are not getting updated directly after unfollowing someone
 def get_user_profile(username, headers):
     response = session.get(profile_route, params={'username': username}, headers=headers).json()
     return response['data']['user']
@@ -146,6 +149,7 @@ def get_following_list(user_id, headers):
     return follows_list
 
 
+# TODO: check with the new API
 def unfollow(user):
     if os.environ.get('DRY_RUN'):
         return True
