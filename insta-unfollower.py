@@ -17,8 +17,9 @@ following_cache = '%s/following.json' % (cache_dir)
 
 instagram_url = 'https://www.instagram.com'
 login_route = '%s/accounts/login/ajax/' % (instagram_url)
-profile_route = '%s/%s/'
-query_route = '%s/graphql/query/' % (instagram_url)
+profile_route = '%s/api/v1/users/web_profile_info/' % (instagram_url)
+followers_route = '%s/api/v1/friendships/%s/followers/'
+following_route = '%s/api/v1/friendships/%s/following/'
 unfollow_route = '%s/web/friendships/%s/unfollow/'
 
 session = requests.Session()
@@ -36,40 +37,43 @@ class Credentials:
             sys.exit('Please provide INSTA_USERNAME and INSTA_PASSWORD environement variables or as an argument as such: ./insta-unfollower.py USERNAME PASSWORD.\nAborting...')
 
 credentials = Credentials()
-def login():
-    session.headers.update({
-        'Accept-Encoding': 'gzip, deflate',
-        'Accept-Language': 'en-US,en;q=0.8',
-        'Connection': 'keep-alive',
-        'Content-Length': '0',
-        'Host': 'www.instagram.com',
-        'Origin': 'https://www.instagram.com',
-        'Referer': 'https://www.instagram.com/',
-        'User-Agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 \
-            (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36'),
-        'X-Instagram-AJAX': '7a3a3e64fa87',
-        'X-Requested-With': 'XMLHttpRequest'
-    })
 
-    reponse = session.get(instagram_url)
+def init():
+    headers = {
+        'User-Agent': ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36')
+    }
 
-    csrf = re.findall(r"csrf_token\":\"(.*?)\"", reponse.text)[0]
+    res1 = session.get(instagram_url, headers=headers)
+    ig_app_id = re.findall(r'X-IG-App-ID":"(.*?)"', res1.text)[0]
+
+    res2 = session.get('https://www.instagram.com/data/shared_data/', headers=headers, cookies=res1.cookies)
+    csrf = res2.json()['config']['csrf_token']
     if csrf:
-        session.headers.update({
-            'x-csrftoken': csrf
-        })
+        headers['x-csrftoken'] = csrf
+        # extra needed headers
+        headers['accept-language'] = "en-GB,en-US;q=0.9,en;q=0.8,fr;q=0.7,es;q=0.6,es-MX;q=0.5,es-ES;q=0.4"
+        headers['x-requested-with'] = "XMLHttpRequest"
+        headers['accept'] = "*/*"
+        headers['referer'] = "https://www.instagram.com/"
+        headers['x-ig-app-id'] = ig_app_id
+        ###
+        cookies = res1.cookies.get_dict()
+        cookies['csrftoken'] = csrf
     else:
-        print("No csrf token found in cookies, maybe you are temp ban? Wait 1 hour and retry")
+        print("No csrf token found in code or empty, maybe you are temp ban? Wait 1 hour and retry")
         return False
 
     time.sleep(random.randint(2, 6))
 
+    return headers, cookies
+
+def login(headers, cookies):
     post_data = {
         'username': credentials.username,
         'enc_password': '#PWD_INSTAGRAM_BROWSER:0:{}:{}'.format(int(datetime.now().timestamp()), credentials.password)
     }
 
-    response = session.post(login_route, data=post_data, allow_redirects=True)
+    response = session.post(login_route, headers=headers, data=post_data, cookies=cookies, allow_redirects=True)
     response_data = json.loads(response.text)
 
     if 'two_factor_required' in response_data:
@@ -80,99 +84,64 @@ def login():
         print('Please check Instagram app for a security confirmation that it is you trying to login.')
         sys.exit(1)
 
-    return response_data['authenticated']
+    return response_data['authenticated'], response.cookies.get_dict()
 
 
-# Not so useful, it's just to simulate human actions better
-def get_user_profile(username):
-    response = session.get(profile_route % (instagram_url, username))
-    extract = re.search(r'window._sharedData = (.+);</script>', str(response.text))
-    response = json.loads(extract.group(1))
-    return response['entry_data']['ProfilePage'][0]['graphql']['user']
+def get_user_profile(username, headers):
+    response = session.get(profile_route, params={'username': username}, headers=headers).json()
+    return response['data']['user']
 
 
-def get_followers_list():
+def get_followers_list(user_id, headers):
     followers_list = []
 
-    query_hash = '56066f031e6239f35a904ac20c9f37d9'
-    variables = {
-        "id":session.cookies['ds_user_id'],
-        "include_reel":False,
-        "fetch_mutual":False,
-        "first":50
-    }
-
-    response = session.get(query_route, params={'query_hash': query_hash, 'variables': json.dumps(variables)})
-    while response.status_code != 200:
+    response = session.get(followers_route % (instagram_url, user_id), headers=headers).json()
+    while response['status'] != 'ok':
         time.sleep(600) # querying too much, sleeping a bit before querying again
-        response = session.get(query_route, params={'query_hash': query_hash, 'variables': json.dumps(variables)})
+        response = session.get(followers_route % (instagram_url, user_id), headers=headers).json()
 
     print('.', end='', flush=True)
 
-    response = json.loads(response.text)
+    followers_list.extend(response['users'])
 
-    for edge in response['data']['user']['edge_followed_by']['edges']:
-        followers_list.append(edge['node'])
-
-    while response['data']['user']['edge_followed_by']['page_info']['has_next_page']:
-        variables['after'] = response['data']['user']['edge_followed_by']['page_info']['end_cursor']
-
+    while 'next_max_id' in response:
         time.sleep(2)
 
-        response = session.get(query_route, params={'query_hash': query_hash, 'variables': json.dumps(variables)})
-        while response.status_code != 200:
+        response = session.get(followers_route % (instagram_url, user_id), params={'max_id': response['next_max_id']}, headers=headers).json()
+        while response['status'] != 'ok':
             time.sleep(600) # querying too much, sleeping a bit before querying again
-            response = session.get(query_route, params={'query_hash': query_hash, 'variables': json.dumps(variables)})
+            response = session.get(followers_route % (instagram_url, user_id), params={'max_id': response['next_max_id']}, headers=headers).json()
 
         print('.', end='', flush=True)
 
-        response = json.loads(response.text)
-
-        for edge in response['data']['user']['edge_followed_by']['edges']:
-            followers_list.append(edge['node'])
+        followers_list.extend(response['users'])
 
     return followers_list
 
 
-def get_following_list():
+def get_following_list(user_id, headers):
     follows_list = []
 
-    query_hash = 'c56ee0ae1f89cdbd1c89e2bc6b8f3d18'
-    variables = {
-        "id":session.cookies['ds_user_id'],
-        "include_reel":False,
-        "fetch_mutual":False,
-        "first":50
-    }
-
-    response = session.get(query_route, params={'query_hash': query_hash, 'variables': json.dumps(variables)})
-    while response.status_code != 200:
+    response = session.get(following_route % (instagram_url, user_id), headers=headers).json()
+    while response['status'] != 'ok':
         time.sleep(600) # querying too much, sleeping a bit before querying again
-        response = session.get(query_route, params={'query_hash': query_hash, 'variables': json.dumps(variables)})
+        response = session.get(following_route % (instagram_url, user_id), headers=headers).json()
 
     print('.', end='', flush=True)
 
-    response = json.loads(response.text)
+    follows_list.extend(response['users'])
 
-    for edge in response['data']['user']['edge_follow']['edges']:
-        follows_list.append(edge['node'])
-
-    while response['data']['user']['edge_follow']['page_info']['has_next_page']:
-        variables['after'] = response['data']['user']['edge_follow']['page_info']['end_cursor']
-
+    while 'next_max_id' in response:
         time.sleep(2)
 
-        response = session.get(query_route, params={'query_hash': query_hash, 'variables': json.dumps(variables)})
-        while response.status_code != 200:
+        response = session.get(following_route % (instagram_url, user_id), params={'max_id': response['next_max_id']}, headers=headers).json()
+        while response['status'] != 'ok':
             time.sleep(600) # querying too much, sleeping a bit before querying again
-            response = session.get(query_route, params={'query_hash': query_hash, 'variables': json.dumps(variables)})
+            response = session.get(following_route % (instagram_url, user_id), params={'max_id': response['next_max_id']}, headers=headers).json()
 
         print('.', end='', flush=True)
 
-        response = json.loads(response.text)
-
-        for edge in response['data']['user']['edge_follow']['edges']:
-            follows_list.append(edge['node'])
+        follows_list.extend(response['users'])
 
     return follows_list
 
@@ -213,11 +182,13 @@ def main():
     if not os.path.isdir(cache_dir):
         os.makedirs(cache_dir)
 
+    headers, cookies = init()
+
     if os.path.isfile(session_cache):
         with open(session_cache, 'rb') as f:
             session.cookies.update(pickle.load(f))
     else:
-        is_logged = login()
+        is_logged, cookies = login(headers, cookies)
         if is_logged == False:
             sys.exit('login failed, verify user/password combination')
 
@@ -226,7 +197,7 @@ def main():
 
         time.sleep(random.randint(2, 4))
 
-    connected_user = get_user_profile(credentials.username)
+    connected_user = get_user_profile(credentials.username, headers)
 
     print('You\'re now logged as {} ({} followers, {} following)'.format(connected_user['username'], connected_user['edge_followed_by']['count'], connected_user['edge_follow']['count']))
 
@@ -243,7 +214,7 @@ def main():
             print('rebuilding following list...', end='', flush=True)
         else:
             print('building following list...', end='', flush=True)
-        following_list = get_following_list()
+        following_list = get_following_list(connected_user['id'], headers)
         print(' done')
 
         with open(following_cache, 'w') as f:
@@ -260,7 +231,7 @@ def main():
             print('rebuilding followers list...', end='', flush=True)
         else:
             print('building followers list...', end='', flush=True)
-        followers_list = get_followers_list()
+        followers_list = get_followers_list(connected_user['id'], headers)
         print(' done')
 
         with open(followers_cache, 'w') as f:
