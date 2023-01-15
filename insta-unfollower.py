@@ -21,7 +21,6 @@ profile_route = '%s/api/v1/users/web_profile_info/' % (instagram_url)
 followers_route = '%s/api/v1/friendships/%s/followers/'
 following_route = '%s/api/v1/friendships/%s/following/'
 unfollow_route = '%s/web/friendships/%s/unfollow/'
-
 session = requests.Session()
 
 
@@ -34,14 +33,17 @@ class Credentials:
             self.username = sys.argv[1]
             self.password = sys.argv[2]
         else:
-            sys.exit('Please provide INSTA_USERNAME and INSTA_PASSWORD environement variables or as an argument as such: ./insta-unfollower.py USERNAME PASSWORD.\nAborting...')
+            sys.exit(
+                'Please provide INSTA_USERNAME and INSTA_PASSWORD environement variables or as an argument as such: ./insta-unfollower.py USERNAME PASSWORD.\nAborting...')
+
 
 credentials = Credentials()
 
 
 def init():
     headers = {
-        'User-Agent': ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36')
+        'User-Agent': (
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36')
     }
 
     res1 = session.get(instagram_url, headers=headers)
@@ -100,7 +102,7 @@ def get_followers_list(user_id, headers):
 
     response = session.get(followers_route % (instagram_url, user_id), headers=headers).json()
     while response['status'] != 'ok':
-        time.sleep(600) # querying too much, sleeping a bit before querying again
+        time.sleep(600)  # querying too much, sleeping a bit before querying again
         response = session.get(followers_route % (instagram_url, user_id), headers=headers).json()
 
     print('.', end='', flush=True)
@@ -110,10 +112,12 @@ def get_followers_list(user_id, headers):
     while 'next_max_id' in response:
         time.sleep(2)
 
-        response = session.get(followers_route % (instagram_url, user_id), params={'max_id': response['next_max_id']}, headers=headers).json()
+        response = session.get(followers_route % (instagram_url, user_id), params={'max_id': response['next_max_id']},
+                               headers=headers).json()
         while response['status'] != 'ok':
-            time.sleep(600) # querying too much, sleeping a bit before querying again
-            response = session.get(followers_route % (instagram_url, user_id), params={'max_id': response['next_max_id']}, headers=headers).json()
+            time.sleep(600)  # querying too much, sleeping a bit before querying again
+            response = session.get(followers_route % (instagram_url, user_id),
+                                   params={'max_id': response['next_max_id']}, headers=headers).json()
 
         print('.', end='', flush=True)
 
@@ -127,7 +131,7 @@ def get_following_list(user_id, headers):
 
     response = session.get(following_route % (instagram_url, user_id), headers=headers).json()
     while response['status'] != 'ok':
-        time.sleep(600) # querying too much, sleeping a bit before querying again
+        time.sleep(600)  # querying too much, sleeping a bit before querying again
         response = session.get(following_route % (instagram_url, user_id), headers=headers).json()
 
     print('.', end='', flush=True)
@@ -137,10 +141,12 @@ def get_following_list(user_id, headers):
     while 'next_max_id' in response:
         time.sleep(2)
 
-        response = session.get(following_route % (instagram_url, user_id), params={'max_id': response['next_max_id']}, headers=headers).json()
+        response = session.get(following_route % (instagram_url, user_id), params={'max_id': response['next_max_id']},
+                               headers=headers).json()
         while response['status'] != 'ok':
-            time.sleep(600) # querying too much, sleeping a bit before querying again
-            response = session.get(following_route % (instagram_url, user_id), params={'max_id': response['next_max_id']}, headers=headers).json()
+            time.sleep(600)  # querying too much, sleeping a bit before querying again
+            response = session.get(following_route % (instagram_url, user_id),
+                                   params={'max_id': response['next_max_id']}, headers=headers).json()
 
         print('.', end='', flush=True)
 
@@ -150,22 +156,22 @@ def get_following_list(user_id, headers):
 
 
 # TODO: check with the new API
-def unfollow(user):
+def unfollow(user, headers):
     if os.environ.get('DRY_RUN'):
         return True
 
-    response = session.get(profile_route % (instagram_url, user['username']))
+    response = session.get(profile_route, params={'username': user['username']}, headers=headers).headers
+
     time.sleep(random.randint(2, 4))
 
-    csrf = re.findall(r"csrf_token\":\"(.*?)\"", response.text)[0]
+    csrf = re.search(r"csrftoken=(.*?);", str(response)).group(1)
+
     if csrf:
-        session.headers.update({
-            'x-csrftoken': csrf
-        })
+        session.headers.update({'x-csrftoken': csrf})
 
-    response = session.post(unfollow_route % (instagram_url, user['id']))
+    response = session.post(unfollow_route % (instagram_url, user['pk']))
 
-    if response.status_code == 429: # Too many requests
+    if response.status_code == 429:  # Too many requests
         print('Temporary ban from Instagram. Grab a coffee watch a TV show and comeback later. I will try again...')
         return False
 
@@ -179,7 +185,6 @@ def unfollow(user):
 
 
 def main():
-
     if os.environ.get('DRY_RUN'):
         print('DRY RUN MODE, script will not unfollow users!')
 
@@ -203,7 +208,9 @@ def main():
 
     connected_user = get_user_profile(credentials.username, headers)
 
-    print('You\'re now logged as {} ({} followers, {} following)'.format(connected_user['username'], connected_user['edge_followed_by']['count'], connected_user['edge_follow']['count']))
+    print('You\'re now logged as {} ({} followers, {} following)'.format(connected_user['username'],
+                                                                         connected_user['edge_followed_by']['count'],
+                                                                         connected_user['edge_follow']['count']))
 
     time.sleep(random.randint(2, 4))
 
@@ -259,8 +266,8 @@ def main():
             time.sleep(random.randint(5, 10))
 
             print('Unfollowing {}...'.format(user['username']))
-            while unfollow(user) == False:
-                sleep_time = random.randint(1, 3) * 1000 # High number on purpose
+            while unfollow(user, headers) == False:
+                sleep_time = random.randint(1, 3) * 1000  # High number on purpose
                 print('Sleeping for {} seconds'.format(sleep_time))
                 time.sleep(sleep_time)
 
