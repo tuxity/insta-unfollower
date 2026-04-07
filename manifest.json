@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Insta Unfollower (personal)",
+  "version": "1.0.0",
+  "description": "Personal tool: unfollow accounts that do not follow you back while logged in on instagram.com.",
+  "action": {
+    "default_title": "Insta Unfollower",
+    "default_popup": "popup.html"
+  },
+  "permissions": ["scripting", "storage", "tabs"],
+  "host_permissions": ["https://www.instagram.com/*"]
+}

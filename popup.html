@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Insta Unfollower</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header class="popup-header">
+    <span class="popup-title">Insta Unfollower</span>
+    <nav class="tab-bar" role="tablist" aria-label="Popup sections">
+      <button type="button" class="tab-btn active" id="tabMain" role="tab" aria-selected="true" aria-controls="panelMain" title="Main">
+        <svg class="tab-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8h5z"/>
+        </svg>
+      </button>
+      <button type="button" class="tab-btn" id="tabWhitelist" role="tab" aria-selected="false" aria-controls="panelWhitelist" title="Whitelist">
+        <svg class="tab-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h10v2H4v-2z"/>
+        </svg>
+      </button>
+    </nav>
+  </header>
+
+  <div id="panelMain" class="tab-panel active" role="tabpanel" aria-labelledby="tabMain">
+    <p class="hint">Use the <strong>active tab</strong> on instagram.com while logged in.</p>
+
+    <div id="summary" class="summary" aria-live="polite">
+      <div><strong>Account:</strong> <span id="who">—</span></div>
+      <div><strong>Following</strong> (count): <span id="followingCount">—</span></div>
+      <div><strong>Followers</strong> (count): <span id="followersCount">—</span></div>
+      <div><strong>Don’t follow you back</strong> (cached): <span id="unfollowersCount">—</span></div>
+    </div>
+
+    <button type="button" id="btnRefreshCounts" class="secondary">Refresh counts</button>
+
+    <button type="button" id="btnLoadUnfollowers" class="secondary" disabled>Load Unfollowers</button>
+
+    <button type="button" id="btnDownloadUnfollowers" class="secondary" disabled>Download unfollowers (.txt)</button>
+
+    <div id="loadProgress" class="load-progress" hidden aria-live="polite">
+      <div class="load-progress-label">Progress</div>
+      <pre id="loadProgressText" class="load-progress-text"></pre>
+    </div>
+
+    <button type="button" id="btnStop" class="stop">Stop current job</button>
+    <p class="stop-hint">Sets a cancel flag in the Instagram tab; long waits and between-page pauses stop within ~1s. A request already in flight may still finish.</p>
+
+    <p class="section-label">Unfollow step</p>
+    <button type="button" id="btnUnfollow" class="primary" disabled>Unfollow non-followers</button>
+
+    <pre id="log" aria-live="polite"></pre>
+  </div>
+
+  <div id="panelWhitelist" class="tab-panel" role="tabpanel" aria-labelledby="tabWhitelist">
+    <p class="hint whitelist-hint">Usernames here are never unfollowed, even if they appear in the cached “don’t follow back” list. Matching is case-insensitive.</p>
+    <div class="whitelist-add-row">
+      <input type="text" id="whitelistInput" class="whitelist-input" placeholder="username" autocomplete="off" spellcheck="false" />
+      <button type="button" id="btnWhitelistAdd" class="secondary whitelist-add-btn">Add</button>
+    </div>
+    <p class="whitelist-count"><span id="whitelistCount">0</span> in whitelist</p>
+    <div id="whitelistList" class="whitelist-list" aria-live="polite"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

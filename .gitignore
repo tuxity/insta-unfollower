@@ -1,7 +1,22 @@
-.DS_Store
+# environment / local secrets
+.env
 
 # IDE files
 .idea
 
-# Cache files
-cache
+# Python (leftover local envs from old script workflow)
+.venv
+__pycache__
+*.pyc
+
+# macOS files
+.DS_Store
+
+# Windows files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux files
+.directory
+.Trash
